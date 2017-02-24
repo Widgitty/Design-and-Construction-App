@@ -1,0 +1,279 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+    android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:paddingBottom="@dimen/activity_vertical_margin" tools:context=".MainActivity">
+
+    <!--
+    <TextView android:text="@string/hello_world" android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+    -->
+
+    <LinearLayout
+    android:id="@+id/linearLayout1"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="bottom|left|right"
+    android:orientation="vertical" >
+
+
+
+        <TextView
+            android:id="@+id/tvLabel1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Connection Type Select" />
+
+        <RadioGroup xmlns:android="http://schemas.android.com/apk/res/android"
+            android:id="@+id/radioGroup"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <RadioButton android:id="@+id/radio_AT"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="ATmega16u2"
+                android:checked="true"
+                android:paddingRight="10dp"
+                android:onClick="onRadioButtonClicked"/>
+            <RadioButton android:id="@+id/radio_FT"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="FT232HQ"
+                android:onClick="onRadioButtonClicked"/>
+            <RadioButton android:id="@+id/radio_WiFi"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="WiFi"
+                android:onClick="onRadioButtonClicked"/>
+        </RadioGroup>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="10dp" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@android:color/darker_gray"/>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="10dp" />
+
+
+
+
+        <TextView
+            android:id="@+id/tvLabel2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Connection" />
+
+        <LinearLayout
+            android:id="@+id/linearLayout2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="bottom|left|right"
+            android:orientation="horizontal" >
+
+            <Button
+                android:id="@+id/btnBegin"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:onClick="onBeginClick"
+                android:layout_weight=".5"
+                android:text="Begin" />
+
+            <Button
+                android:id="@+id/btnEnd"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:onClick="onEndClick"
+                android:layout_weight=".5"
+                android:text="End" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/linearLayout3"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="bottom|left|right"
+            android:orientation="horizontal" >
+
+
+            <Button
+                android:id="@+id/btnRead"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:onClick="onReadClick"
+                android:layout_weight=".5"
+                android:text="Read" />
+
+
+            <Button
+                android:id="@+id/btnEndRead"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:onClick="onEndReadClick"
+                android:layout_weight=".5"
+                android:text="End Read" />
+
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="10dp" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@android:color/darker_gray"/>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="10dp" />
+
+
+
+        <TextView
+            android:id="@+id/tvLabel3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Recieve" />
+
+        <LinearLayout
+            android:id="@+id/linearLayout4"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="bottom|left|right"
+            android:orientation="horizontal" >
+
+
+            <ImageView
+                android:id="@+id/led_1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp"
+                android:src="@drawable/led_off" />
+
+            <ImageView
+                android:id="@+id/led_2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp"
+                android:src="@drawable/led_off" />
+
+            <ImageView
+                android:id="@+id/led_3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp"
+                android:src="@drawable/led_off" />
+
+            <ImageView
+                android:id="@+id/led_4"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp"
+                android:src="@drawable/led_off" />
+
+            <ImageView
+                android:id="@+id/led_5"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp"
+                android:src="@drawable/led_off" />
+
+            <ImageView
+                android:id="@+id/led_6"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp"
+                android:src="@drawable/led_off" />
+
+            <ImageView
+                android:id="@+id/led_7"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp"
+                android:src="@drawable/led_off" />
+
+            <ImageView
+                android:id="@+id/led_8"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp"
+                android:src="@drawable/led_off" />
+
+
+        </LinearLayout>
+
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="10dp" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@android:color/darker_gray"/>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="10dp" />
+
+
+
+
+        <TextView
+            android:id="@+id/tvLabel4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Send" />
+
+        <EditText
+            android:id="@+id/sendMessage"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:maxLength="16"
+            android:text="Message" />
+
+        <Button
+            android:id="@+id/btnWrite"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="onWriteClick"
+            android:text="Send to LCD"/>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="10dp" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@android:color/darker_gray"/>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="10dp" />
+
+        <TextView
+            android:id="@+id/tvLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Monitor" />
+
+        <TextView
+            android:id="@+id/tvMonitor"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="" />
+
+    </LinearLayout>
+
+
+</RelativeLayout>
