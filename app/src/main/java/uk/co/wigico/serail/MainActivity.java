@@ -18,8 +18,15 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
-import static java.lang.Character.isLetter;
-import static java.lang.Character.isLetterOrDigit;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.InetAddress;
+import java.net.Socket;
+import java.net.SocketTimeoutException;
+import java.net.UnknownHostException;
+import java.util.concurrent.TimeoutException;
+
 
 public class MainActivity extends ActionBarActivity {
 
@@ -32,13 +39,20 @@ public class MainActivity extends ActionBarActivity {
     char LEDs = 0x00;
     Mode_Type Mode = Mode_Type.AT;
 
+    // TCP stuff
+    private Socket socket;
+    private static final int PORT = 1138;
+    private static final String IP = "192.168.1.1";
 
     // Interface components
     public static volatile ImageView LED1, LED2, LED3, LED4, LED5, LED6, LED7, LED8;
     public static ImageView[] LED = {LED1, LED2, LED3, LED4, LED5, LED6, LED7, LED8};
-    Button btnBegin,btnRead,btnEndRead, btnWrite, btnEnd;
+    Button btnBegin, /*btnRead, btnEndRead,*/ btnWrite, btnEnd;
     public static volatile TextView tvMonitor;
     EditText sendMessage;
+    RadioButton radioButton1;
+    RadioButton radioButton2;
+    RadioButton radioButton3;
 
     // [FTDriver] Permission String
     private static final String ACTION_USB_PERMISSION =
@@ -54,10 +68,13 @@ public class MainActivity extends ActionBarActivity {
 
         // Import UI components
         btnBegin = (Button) findViewById(R.id.btnBegin);
-        btnRead = (Button) findViewById(R.id.btnRead);
-        btnEndRead = (Button) findViewById(R.id.btnEndRead);
+        //btnRead = (Button) findViewById(R.id.btnRead);
+        //btnEndRead = (Button) findViewById(R.id.btnEndRead);
         btnWrite = (Button) findViewById(R.id.btnWrite);
         btnEnd = (Button) findViewById(R.id.btnEnd);
+        radioButton1 = (RadioButton) findViewById(R.id.radio_AT);
+        radioButton2 = (RadioButton) findViewById(R.id.radio_FT);
+        radioButton3 = (RadioButton) findViewById(R.id.radio_WiFi);
 
         LED[0] = (ImageView) findViewById(R.id.led_1);
         LED[1] = (ImageView) findViewById(R.id.led_2);
@@ -73,8 +90,8 @@ public class MainActivity extends ActionBarActivity {
         tvMonitor = (TextView) findViewById(R.id.tvMonitor);
 
         // Set default states
-        btnRead.setEnabled(false);
-        btnEndRead.setEnabled(false);
+        //btnRead.setEnabled(false);
+        //btnEndRead.setEnabled(false);
         btnWrite.setEnabled(false);
         btnEnd.setEnabled(false);
 
@@ -101,7 +118,6 @@ public class MainActivity extends ActionBarActivity {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
 
         switch (item.getItemId()) {
             case R.id.action_favorite:
@@ -145,121 +161,54 @@ public class MainActivity extends ActionBarActivity {
 
 
 
+
+    //====================================//
+    //======= Handle button pushes =======//
+    //====================================//
+
     public void onBeginClick(View view) {
-        // Establish connection
 
-        // [FTDriver] Open USB Serial
         if (Mode == Mode_Type.AT) {
-            //mSerial.setFlowControl()
-            if (mSerial.begin(FTDriver.BAUD115200)) {
-                btnBegin.setEnabled(false);
-                btnRead.setEnabled(true);
-                btnEndRead.setEnabled(true);
-                btnWrite.setEnabled(true);
-                btnEnd.setEnabled(true);
-
-                Toast.makeText(this, "connected", Toast.LENGTH_SHORT).show();
-            } else {
-                Toast.makeText(this, "cannot connect", Toast.LENGTH_SHORT).show();
-            }
+            new Thread(new ATSerialThread()).start();
+        }
+        else if (Mode == Mode_Type.FT) {
+            Toast.makeText(this, "FTDI chip not supported", Toast.LENGTH_SHORT).show();
         }
         else if (Mode == Mode_Type.WiFi) {
-            Toast.makeText(this, "Could not connect to socket", Toast.LENGTH_SHORT).show();
             // TODO: Add socket support
+            new Thread(new WiFiThread()).start();
         }
-    }
-
-    public void onReadClick(View view) {
-        // Begin reading data
-
-        read = true;
-        btnEnd.setEnabled(false);
-
-        int i,len;
-
-        final StringBuilder mText = new StringBuilder();
-        byte[] rbuf = new byte[4096]; // 1byte <--slow-- [Transfer Speed] --fast--> 4096 byte
-
-
-        // [FTDriver] Read from USB Serial
-        len = mSerial.read(rbuf);
-
-        for (i = 0; i < len; i++) {
-            if (isLetterOrDigit((char) rbuf[i]))
-                mText.append((char) rbuf[i]);
-        }
-
-        if (len > 0) {
-            LEDs = (char) rbuf[len - 1];
-        }
-
-
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                int i,len;
-                char LEDs = 0x00;
-                final StringBuilder mText = new StringBuilder();
-                byte[] rbuf = new byte[4096]; // 1byte <--slow-- [Transfer Speed] --fast--> 4096 byte
-                while (read) {
-
-                    // [FTDriver] Read from USB Serial
-                    len = mSerial.read(rbuf);
-
-                    for (i = 0; i < len; i++) {
-                        //if (isLetterOrDigit((char) rbuf[i]))
-                            mText.append((char) rbuf[i]);
-                        if ((char)rbuf[i] == '\n') {
-                            DisplayString(mText.toString());
-                            mText.delete(0, mText.length());
-                        }
-                    }
-
-                    if (len > 0) {
-                        LEDs = (char) rbuf[len - 1];
-
-                        // This function communicates back to the UI components by passing a
-                        // runnable function to the component, as described in the Android
-                        // doccumentation.
-                        updateLEDs(LEDs);
-                    }
-                }
-            }
-        }).start();
-        // TODO: Check thread exit, ensure that the thread never gets left running
-
-    }
-
-    public void onEndReadClick(View view) {
-        read = false;
-        btnEnd.setEnabled(true);
     }
 
 
     public void onWriteClick(View view) {
         // Serial print string from text box
 
-        String wbuf = sendMessage.getText().toString();
-        Toast.makeText(this, "Sending: " + wbuf, Toast.LENGTH_SHORT).show();
+        if (Mode == Mode_Type.AT) {
 
-        // [FTDriver] Wirte to USB Serial
-        mSerial.write(wbuf.getBytes());
-        mSerial.write("\n");
+            // TODO: this is not compatible with the WiFI mode
+            String wbuf = sendMessage.getText().toString();
+            Toast.makeText(this, "Sending: " + wbuf, Toast.LENGTH_SHORT).show();
+
+            // [FTDriver] Wirte to USB Serial
+            mSerial.write(wbuf.getBytes());
+            mSerial.write("\n");
+
+        }
+        else if (Mode == Mode_Type.FT) {
+            Toast.makeText(this, "FTDI chip not supported", Toast.LENGTH_SHORT).show();
+        }
+        else if (Mode == Mode_Type.WiFi) {
+            // TODO: Add socket support
+            Toast.makeText(this, "Transmit not currently supported for WiFi mode", Toast.LENGTH_SHORT).show();
+        }
     }
 
 
     public void onEndClick(View view) {
-        // [FTDriver] Close USB Serial
-        mSerial.end();
-
-        btnBegin.setEnabled(true);
-        btnRead.setEnabled(false);
-        btnEndRead.setEnabled(false);
-        btnWrite.setEnabled(false);
-        btnEnd.setEnabled(false);
-
-        Toast.makeText(this, "disconnect", Toast.LENGTH_SHORT).show();
+        read = false;
     }
+
 
     public void onRadioButtonClicked(View view) {
         boolean checked = ((RadioButton) view).isChecked();
@@ -285,6 +234,148 @@ public class MainActivity extends ActionBarActivity {
         }
     }
 
+
+
+
+
+
+    //====================================//
+    //====== Communication  Threads ======//
+    //====================================//
+
+
+    class ATSerialThread implements Runnable {
+
+        @Override
+        public void run() {
+
+            //mSerial.setFlowControl()
+            if (mSerial.begin(FTDriver.BAUD115200)) {
+                // TODO: Make a function to do this properly
+                MaskButtonsConnected(true);
+                ThreadToast("Connected");
+                read = true;
+            } else {
+                ThreadToast("Cannot connect");
+                read = false;
+            }
+
+
+            int i,len;
+            char LEDs = 0x00;
+            final StringBuilder mText = new StringBuilder();
+            byte[] rbuf = new byte[4096]; // 1byte <--slow-- [Transfer Speed] --fast--> 4096 byte
+            while (read) {
+                len = mSerial.read(rbuf);
+
+                for (i = 0; i < len; i++) {
+                    //if (isLetterOrDigit((char) rbuf[i]))
+                    mText.append((char) rbuf[i]);
+                    if ((char)rbuf[i] == '\n') {
+                        DisplayString(mText.toString());
+                        mText.delete(0, mText.length());
+                    }
+                }
+
+                if (len > 0) {
+                    LEDs = (char) rbuf[len - 1];
+
+                    // This function communicates back to the UI components by passing a
+                    // runnable function to the component, as described in the Android
+                    // documentation.
+                    updateLEDs(LEDs);
+                }
+            }
+
+            // End
+            mSerial.end();
+            MaskButtonsConnected(false);
+            ThreadToast("Disconnected");
+
+        }
+    }
+
+
+    class WiFiThread implements Runnable {
+
+        @Override
+        public void run() {
+
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream(1024);
+            byte[] buffer = new byte[1];
+            int bytesRead;
+            InputStream inputStream = null;
+            String response = "";
+            final StringBuilder mText = new StringBuilder();
+
+            try {
+                InetAddress serverAddr = InetAddress.getByName(IP);
+                socket = new Socket(serverAddr, PORT);
+                socket.setSoTimeout(1000);
+                inputStream = socket.getInputStream();
+                read = true;
+                MaskButtonsConnected(true);
+                ThreadToast("Connected to socket");
+
+                //TODO: could use this?
+                /*
+                while ((bytesRead = inputStream.read(buffer)) != -1) {
+                    byteArrayOutputStream.write(buffer, 0, bytesRead);
+                    response += byteArrayOutputStream.toString("UTF-8");
+                }
+                */
+
+            } catch (UnknownHostException e) {
+                e.printStackTrace();
+                ThreadToast("Failed to connect to socket");
+                read = false;
+            } catch (IOException e) {
+                e.printStackTrace();
+                ThreadToast("IO Exception");
+                read = false;
+            }
+
+            int Bytes;
+            while (read) {
+                try {
+                    if ((Bytes = inputStream.read(buffer)) > 0) {
+                        mText.append((char)buffer[0]);
+                        if ((char)buffer[0] == '\n') {
+                            DisplayString(mText.toString());
+                            mText.delete(0, mText.length());
+                        }
+                    }
+                } catch (SocketTimeoutException e) {
+                    e.printStackTrace();
+                    //ThreadToast("Timeout");
+                } catch (IOException e) {
+                    // Expected exception
+                    ThreadToast("IO exception");
+                }
+            }
+
+            // TODO: close and exit
+            if (socket != null) {
+                try {
+                    socket.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            ThreadToast("Disconnected");
+            MaskButtonsConnected(false);
+        }
+    }
+
+
+
+
+
+    //====================================//
+    //======= Supporting functions =======//
+    //====================================//
+
     public void updateLEDs(char LEDs)
     {
         int i;
@@ -309,6 +400,7 @@ public class MainActivity extends ActionBarActivity {
         }
     }
 
+
     public void DisplayString(String str) {
         final String strSend = str;
         tvMonitor.post(new Runnable() {
@@ -318,4 +410,77 @@ public class MainActivity extends ActionBarActivity {
             }
         });
     }
+
+
+    public void ThreadToast (String str) {
+        final String strf = str;
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(getApplicationContext(), strf, Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+
+    public void MaskButtonsConnected (final Boolean mask) { // True when connected
+
+        btnBegin.post(new Runnable() {
+            @Override
+            public void run() {
+                btnBegin.setEnabled(!mask);
+            }
+        });
+
+        btnWrite.post(new Runnable() {
+            @Override
+            public void run() {
+                btnWrite.setEnabled(mask);
+            }
+        });
+
+        btnEnd.post(new Runnable() {
+            @Override
+            public void run() {
+                btnEnd.setEnabled(mask);
+            }
+        });
+
+        radioButton1.post(new Runnable() {
+            @Override
+            public void run() {
+                radioButton1.setEnabled(!mask);
+            }
+        });
+
+        radioButton2.post(new Runnable() {
+            @Override
+            public void run() {
+                radioButton2.setEnabled(!mask);
+            }
+        });
+
+        radioButton3.post(new Runnable() {
+            @Override
+            public void run() {
+                radioButton3.setEnabled(!mask);
+            }
+        });
+    }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
