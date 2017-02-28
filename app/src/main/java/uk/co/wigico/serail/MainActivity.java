@@ -18,9 +18,12 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
@@ -183,15 +186,12 @@ public class MainActivity extends ActionBarActivity {
 
     public void onWriteClick(View view) {
         // Serial print string from text box
+        String str = sendMessage.getText().toString();
+        Toast.makeText(this, "Sending: " + str, Toast.LENGTH_SHORT).show();
 
         if (Mode == Mode_Type.AT) {
 
-            // TODO: this is not compatible with the WiFI mode
-            String wbuf = sendMessage.getText().toString();
-            Toast.makeText(this, "Sending: " + wbuf, Toast.LENGTH_SHORT).show();
-
-            // [FTDriver] Wirte to USB Serial
-            mSerial.write(wbuf.getBytes());
+            mSerial.write(str.getBytes());
             mSerial.write("\n");
 
         }
@@ -200,7 +200,19 @@ public class MainActivity extends ActionBarActivity {
         }
         else if (Mode == Mode_Type.WiFi) {
             // TODO: Add socket support
-            Toast.makeText(this, "Transmit not currently supported for WiFi mode", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Transmit not currently in alpha", Toast.LENGTH_SHORT).show();
+            try {
+                PrintWriter out = new PrintWriter(new BufferedWriter(
+                        new OutputStreamWriter(socket.getOutputStream())),
+                        true);
+                out.println(str);
+            } catch (UnknownHostException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 
