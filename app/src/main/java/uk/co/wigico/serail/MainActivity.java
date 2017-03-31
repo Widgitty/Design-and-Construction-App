@@ -61,6 +61,9 @@ public class MainActivity extends ActionBarActivity {
     private static final String ACTION_USB_PERMISSION =
             "jp.ksksue.tutorial.USB_PERMISSION";
 
+    // Static variables
+    public static volatile double received = 0.1;
+
 
 
 
@@ -297,7 +300,11 @@ public class MainActivity extends ActionBarActivity {
                     //if (isLetterOrDigit((char) rbuf[i]))
                     mText.append((char) rbuf[i]);
                     if ((char)rbuf[i] == '\n') {
-                        DisplayString(mText.toString());
+                        //DisplayString(mText.toString());
+                        // Update data store
+                        //received = Double.parseDouble(mText.toString());
+                        received = Double.valueOf((mText.toString()).trim()).doubleValue();
+                        DisplayString(Double.toString(received));
                         mText.delete(0, mText.length());
                     }
                 }
@@ -366,7 +373,11 @@ public class MainActivity extends ActionBarActivity {
                     if ((Bytes = inputStream.read(buffer)) > 0) {
                         mText.append((char)buffer[0]);
                         if ((char)buffer[0] == '\n') {
-                            DisplayString(mText.toString());
+                            //DisplayString(mText.toString());
+                            // Update data store
+                            //received = Double.parseDouble(mText.toString());
+                            received = Double.parseDouble(mText.toString());
+                            DisplayString(Double.toString(received));
                             mText.delete(0, mText.length());
                         }
                     }
@@ -502,8 +513,8 @@ public class MainActivity extends ActionBarActivity {
     //======= Interface =======//
     //====================================//
 
-    public static int GetData() {
-        return 10;
+    public static double GetData() {
+        return received;
     }
 }
 

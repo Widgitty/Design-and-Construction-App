@@ -7,7 +7,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
-
+import android.widget.Toast;
 
 
 public class DebugActivity extends ActionBarActivity {
@@ -25,7 +25,9 @@ public class DebugActivity extends ActionBarActivity {
         // Import UI components
         dial = (ImageButton) findViewById(R.id.imageViewDial);
         screenText = (TextView) findViewById(R.id.textViewScreen);
-        screenText.setText(Integer.toString(MainActivity.GetData()));
+        //screenText.setText(Double.toString(MainActivity.GetData()));
+        screenText.setText(Double.toString(MainActivity.received));
+        Toast.makeText(this, Double.toString(MainActivity.received), Toast.LENGTH_SHORT).show();
 
     }
 

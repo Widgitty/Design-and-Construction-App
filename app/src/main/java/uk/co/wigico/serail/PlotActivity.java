@@ -5,6 +5,7 @@ import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.series.DataPoint;
@@ -14,16 +15,28 @@ import com.jjoe64.graphview.series.LineGraphSeries;
 public class PlotActivity extends ActionBarActivity {
 
     LineGraphSeries<DataPoint> data;
+    int count = 1;
+    GraphView graph;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_plot);
-        GraphView graph = (GraphView) findViewById(R.id.graphView_graph);
+        graph = (GraphView) findViewById(R.id.graphView_graph);
+
+        graph.getViewport().setScalable(true);
+        graph.getViewport().setScalable(true);
+        graph.getViewport().setXAxisBoundsManual(true);
+        graph.getViewport().setMaxX(5);
+        graph.getViewport().setMinX(0);
+
         data = new LineGraphSeries<DataPoint>();
-        data.appendData(new DataPoint(1.0, 1.0), true, 2);
-        data.appendData(new DataPoint(2.0, 2.0), true, 2);
+        //data.appendData(new DataPoint(count, 1.0), true, count);
+        //count ++;
+        //data.appendData(new DataPoint(count, 2.0), true, count);
+        //count ++;
         graph.addSeries(data);
+        new Thread(new UpdateThread()).start();
     }
 
     @Override
@@ -47,4 +60,40 @@ public class PlotActivity extends ActionBarActivity {
 
         return super.onOptionsItemSelected(item);
     }
+
+
+
+
+    class UpdateThread implements Runnable {
+
+        @Override
+        public void run() {
+
+            while(true) {
+                //ThreadToast("Update");
+                data.appendData(new DataPoint(count, MainActivity.received), true, count);
+                count ++;
+                graph.getViewport().setXAxisBoundsManual(true);
+                graph.getViewport().setMaxX(count);
+                graph.getViewport().setMinX(0);
+
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    public void ThreadToast (String str) {
+        final String strf = str;
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(getApplicationContext(), strf, Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
 }
