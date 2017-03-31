@@ -40,6 +40,17 @@
     <ImageButton
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:id="@+id/imageViewPower"
+        android:background="@null"
+        android:onClick="onPowerClick"
+        android:src="@drawable/pwr_red"
+        android:layout_marginBottom="150dp"
+        android:layout_alignBottom="@+id/imageViewBody"
+        android:layout_centerHorizontal="false" />
+
+    <ImageButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:id="@+id/imageViewDial"
         android:background="@null"
         android:onClick="onDialClick"

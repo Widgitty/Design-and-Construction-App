@@ -122,6 +122,8 @@ public class MainActivity extends ActionBarActivity {
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
 
+        Intent intent;
+
         switch (item.getItemId()) {
             case R.id.action_favorite:
                 // About option clicked.
@@ -131,7 +133,18 @@ public class MainActivity extends ActionBarActivity {
                 // Exit option clicked.
                 Toast.makeText(this, "Debug", Toast.LENGTH_SHORT).show();
 
-                Intent intent = new Intent(this, DebugActivity.class);
+                intent = new Intent(this, DebugActivity.class);
+                //EditText editText = (EditText) findViewById(R.id.edit_message);
+                //String message = editText.getText().toString();
+                //intent.putExtra(EXTRA_MESSAGE, message);
+                startActivity(intent);
+
+                return true;
+            case R.id.action_plot:
+                // Exit option clicked.
+                Toast.makeText(this, "Data Logger", Toast.LENGTH_SHORT).show();
+
+                intent = new Intent(this, PlotActivity.class);
                 //EditText editText = (EditText) findViewById(R.id.edit_message);
                 //String message = editText.getText().toString();
                 //intent.putExtra(EXTRA_MESSAGE, message);
@@ -479,20 +492,18 @@ public class MainActivity extends ActionBarActivity {
             }
         });
     }
+
+
+
+
+
+
+    //====================================//
+    //======= Interface =======//
+    //====================================//
+
+    public static int GetData() {
+        return 10;
+    }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

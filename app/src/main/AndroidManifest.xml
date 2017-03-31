@@ -25,6 +25,10 @@
             android:name=".DebugActivity"
             android:label="@string/title_activity_debug" >
         </activity>
+        <activity
+            android:name=".PlotActivity"
+            android:label="@string/title_activity_plot" >
+        </activity>
     </application>
 
 </manifest>

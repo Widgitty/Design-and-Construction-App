@@ -8,6 +8,8 @@
         app:showAsAction="ifRoom"/>
     <item android:id="@+id/action_settings" android:title="@string/action_settings"
         android:orderInCategory="100" app:showAsAction="never" />
+    <item android:id="@+id/action_plot" android:title="Data Logger"
+        android:orderInCategory="100" app:showAsAction="never" />
     <item android:id="@+id/action_debug" android:title="Debug"
         android:orderInCategory="100" app:showAsAction="never" />
 </menu>
