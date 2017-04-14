@@ -5,11 +5,17 @@ import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
 import android.widget.Toast;
 
 import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
+
+import java.util.Timer;
+
+import static android.os.SystemClock.elapsedRealtime;
 
 
 public class PlotActivity extends ActionBarActivity {
@@ -17,6 +23,9 @@ public class PlotActivity extends ActionBarActivity {
     LineGraphSeries<DataPoint> data;
     int count = 1;
     GraphView graph;
+    boolean record = false;
+    Button btnStartStop;
+    Long startTime = (long)0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,6 +45,9 @@ public class PlotActivity extends ActionBarActivity {
         //data.appendData(new DataPoint(count, 2.0), true, count);
         //count ++;
         graph.addSeries(data);
+
+        btnStartStop = (Button) findViewById(R.id.btnStartStop);
+
         new Thread(new UpdateThread()).start();
     }
 
@@ -71,20 +83,40 @@ public class PlotActivity extends ActionBarActivity {
 
             while(true) {
                 //ThreadToast("Update");
-                data.appendData(new DataPoint(count, MainActivity.received), true, count);
-                count ++;
-                graph.getViewport().setXAxisBoundsManual(true);
-                graph.getViewport().setMaxX(count);
-                graph.getViewport().setMinX(0);
+                if (record) {
+                    data.appendData(new DataPoint((elapsedRealtime () - startTime), MainActivity.received), true, count);
+                    count++;
+                    graph.getViewport().setXAxisBoundsManual(true);
+                    graph.getViewport().setMaxX((elapsedRealtime () - startTime));
+                    graph.getViewport().setMinX(0);
+                }
 
                 try {
-                    Thread.sleep(100);
+                    Thread.sleep(500);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
             }
         }
     }
+
+    public void onStartStopClick(View view) {
+        if (record) {
+            record = false;
+            btnStartStop.setText("Start");
+
+        }
+        else {
+            record = true;
+            startTime = elapsedRealtime ();
+            btnStartStop.setText("Stop");
+        }
+    }
+
+    public void onSaveClick(View view) {
+        ThreadToast("Save");
+    }
+
 
     public void ThreadToast (String str) {
         final String strf = str;

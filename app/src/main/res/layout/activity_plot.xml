@@ -26,6 +26,46 @@
             android:layout_marginTop="82dp" />
         -->
 
+        <!--
+        <android.support.design.widget.TabLayout
+            android:layout_height="match_parent"
+            android:layout_width="match_parent">
+
+            <android.support.design.widget.TabItem
+                android:text="@string/tab_text"/>
+
+            <android.support.design.widget.TabItem
+                android:icon="@drawable/ic_android"/>
+
+        </android.support.design.widget.TabLayout>
+
+        -->
+
+    <LinearLayout
+        android:id="@+id/linearLayout4"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="bottom|left|right"
+        android:orientation="horizontal" >
+
+            <Button
+                android:id="@+id/btnStartStop"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:onClick="onStartStopClick"
+                android:layout_weight=".5"
+                android:text="Start"/>
+
+            <Button
+                android:id="@+id/btnSave"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:onClick="onSaveClick"
+                android:layout_weight=".5"
+                android:text="Save"/>
+
+        </LinearLayout>
+
         <com.jjoe64.graphview.GraphView
             android:layout_width="match_parent"
             android:layout_height="match_parent"

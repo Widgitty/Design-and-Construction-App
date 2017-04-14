@@ -28,6 +28,7 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
+import java.nio.ByteBuffer;
 import java.util.concurrent.TimeoutException;
 
 
@@ -132,9 +133,9 @@ public class MainActivity extends ActionBarActivity {
                 // About option clicked.
                 Toast.makeText(this, "Icon", Toast.LENGTH_SHORT).show();
                 return true;
-            case R.id.action_debug:
+            case R.id.action_GUI:
                 // Exit option clicked.
-                Toast.makeText(this, "Debug", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(this, "Debug", Toast.LENGTH_SHORT).show();
 
                 intent = new Intent(this, DebugActivity.class);
                 //EditText editText = (EditText) findViewById(R.id.edit_message);
@@ -154,6 +155,19 @@ public class MainActivity extends ActionBarActivity {
                 startActivity(intent);
 
                 return true;
+
+            case R.id.action_nav:
+                // Exit option clicked.
+                Toast.makeText(this, "Nav", Toast.LENGTH_SHORT).show();
+
+                //intent = new Intent(this, NavigationDrawerActivity.class);
+                //EditText editText = (EditText) findViewById(R.id.edit_message);
+                //String message = editText.getText().toString();
+                //intent.putExtra(EXTRA_MESSAGE, message);
+                //startActivity(intent);
+
+                return true;
+
             case R.id.action_settings:
                 // Settings option clicked.
                 Toast.makeText(this, "Settings", Toast.LENGTH_SHORT).show();
@@ -292,20 +306,39 @@ public class MainActivity extends ActionBarActivity {
             int i,len;
             char LEDs = 0x00;
             final StringBuilder mText = new StringBuilder();
+            final ByteBuffer bb = ByteBuffer.allocate(8);
             byte[] rbuf = new byte[4096]; // 1byte <--slow-- [Transfer Speed] --fast--> 4096 byte
             while (read) {
                 len = mSerial.read(rbuf);
 
                 for (i = 0; i < len; i++) {
                     //if (isLetterOrDigit((char) rbuf[i]))
-                    mText.append((char) rbuf[i]);
+                    if ((char)rbuf[i] != '\n') {
+                        mText.append((char) rbuf[i]);
+                        bb.put(rbuf[i]);
+                    }
                     if ((char)rbuf[i] == '\n') {
                         //DisplayString(mText.toString());
                         // Update data store
                         //received = Double.parseDouble(mText.toString());
-                        received = Double.valueOf((mText.toString()).trim()).doubleValue();
+
+                        //received = Double.valueOf((mText.toString()).trim()).doubleValue();
+
+                        // De-serialise data
+                        //received = ByteBuffer.wrap(mText.toString().getBytes()).getDouble();
+                        //received = ByteBuffer.wrap(mText.toString().getBytes()).asDoubleBuffer().get();
+                        bb.rewind();
+
+
+                        bb.clear();
+                        bb.put((byte) '0');
+                        bb.put((byte)'.');
+                        bb.put((byte)'1');
+                        received = bb.getDouble(0);
+
                         DisplayString(Double.toString(received));
                         mText.delete(0, mText.length());
+                        bb.clear();
                     }
                 }
 
@@ -339,6 +372,7 @@ public class MainActivity extends ActionBarActivity {
             InputStream inputStream = null;
             String response = "";
             final StringBuilder mText = new StringBuilder();
+            final ByteBuffer bb = ByteBuffer.allocate(1000);
 
             try {
                 InetAddress serverAddr = InetAddress.getByName(IP);
@@ -372,13 +406,25 @@ public class MainActivity extends ActionBarActivity {
                 try {
                     if ((Bytes = inputStream.read(buffer)) > 0) {
                         mText.append((char)buffer[0]);
+                        bb.put(buffer[0]);
                         if ((char)buffer[0] == '\n') {
+                            String str = String.format("Received: %d bytes\n", mText.length());
                             //DisplayString(mText.toString());
-                            // Update data store
-                            //received = Double.parseDouble(mText.toString());
-                            received = Double.parseDouble(mText.toString());
-                            DisplayString(Double.toString(received));
-                            mText.delete(0, mText.length());
+
+                            if (mText.length() >= 8) {
+                                str = (str + "Bytes: ");
+                                for (int i=0; i<mText.length(); i++) {
+                                    byte tempbyte = bb.get(i);
+                                    str = (str + String.format("0x%x, ", tempbyte));
+                                }
+                                str = (str + "\nDouble: ");
+                                bb.rewind();
+                                received = bb.getDouble(0);
+                                str = (str + String.format("%.5f", received));
+                                DisplayString(str);
+                                mText.delete(0, mText.length());
+                                bb.clear();
+                            }
                         }
                     }
                 } catch (SocketTimeoutException e) {
