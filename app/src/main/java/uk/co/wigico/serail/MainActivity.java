@@ -229,8 +229,6 @@ public class MainActivity extends ActionBarActivity {
             Toast.makeText(this, "FTDI chip not supported", Toast.LENGTH_SHORT).show();
         }
         else if (Mode == Mode_Type.WiFi) {
-            // TODO: Add socket support
-            Toast.makeText(this, "Transmit not currently in alpha", Toast.LENGTH_SHORT).show();
             try {
                 PrintWriter out = new PrintWriter(new BufferedWriter(
                         new OutputStreamWriter(socket.getOutputStream())),
@@ -402,9 +400,94 @@ public class MainActivity extends ActionBarActivity {
             }
 
             int Bytes;
+            int state = 0;
+            int loopCounter = 0;
+            int mode = 0;
+            int range = 0;
+            int checksum = 0;
+            String str;
             while (read) {
                 try {
                     if ((Bytes = inputStream.read(buffer)) > 0) {
+
+                        switch (state) {
+
+                            case 0:
+                                if ((char) buffer[0] == 'D') { // check for start byte
+                                    checksum = checksum ^ buffer[0];
+                                    state = 1;
+                                }
+                                break;
+
+                            case 1:
+                                if ((char) buffer[0] == '1') { // only data type '1' currently supported
+                                    checksum = checksum ^ buffer[0];
+                                    state = 2;
+                                }
+                                else {
+                                    checksum = 0;
+                                    state = 0; // treat as misscommunication if not '1'
+                                }
+                                break;
+
+                            case 2:
+                                // receive data
+                                bb.put(buffer[0]);
+                                checksum = checksum ^ buffer[0];
+                                loopCounter++;
+                                if (loopCounter >= 8) {
+                                    loopCounter = 0;
+                                    state = 3;
+                                }
+                                break;
+
+                            case 3:
+                                // receive range
+                                range = (int)buffer[0];
+                                checksum = checksum ^ buffer[0];
+                                state = 4;
+                                break;
+
+                            case 4:
+                                // receive mode
+                                mode = (int)buffer[0];
+                                checksum = checksum ^ buffer[0];
+                                state = 5;
+                                break;
+
+                            case 5:
+                                // checksum
+                                if (checksum == (int)buffer[0]) {
+                                    checksum = (int) buffer[0];
+
+                                    bb.rewind();
+                                    received = bb.getDouble(0);
+                                    str = "";
+                                    str = (str + "Double: ");
+                                    str = (str + String.format("%.5f\n", received));
+
+                                    str = (str + "Range: ");
+                                    str = (str + String.format("%d\n", range));
+
+                                    str = (str + "Mode: ");
+                                    str = (str + String.format("%d\n", mode));
+
+                                    str = (str + "Checksum: ");
+                                    str = (str + String.format("%d\n", checksum));
+
+                                    DisplayString(str);
+                                }
+                                else {
+                                    DisplayString("Checksum failed!");
+                                }
+                                checksum = 0x00;
+                                bb.clear();
+                                state = 0;
+                                break;
+
+                        }
+
+                        /*
                         mText.append((char)buffer[0]);
                         bb.put(buffer[0]);
                         if ((char)buffer[0] == '\n') {
@@ -426,6 +509,7 @@ public class MainActivity extends ActionBarActivity {
                                 bb.clear();
                             }
                         }
+                        */
                     }
                 } catch (SocketTimeoutException e) {
                     e.printStackTrace();
