@@ -303,41 +303,15 @@ public class MainActivity extends ActionBarActivity {
 
             int i,len;
             char LEDs = 0x00;
-            final StringBuilder mText = new StringBuilder();
-            final ByteBuffer bb = ByteBuffer.allocate(8);
             byte[] rbuf = new byte[4096]; // 1byte <--slow-- [Transfer Speed] --fast--> 4096 byte
+
             while (read) {
                 len = mSerial.read(rbuf);
 
                 for (i = 0; i < len; i++) {
-                    //if (isLetterOrDigit((char) rbuf[i]))
-                    if ((char)rbuf[i] != '\n') {
-                        mText.append((char) rbuf[i]);
-                        bb.put(rbuf[i]);
-                    }
-                    if ((char)rbuf[i] == '\n') {
-                        //DisplayString(mText.toString());
-                        // Update data store
-                        //received = Double.parseDouble(mText.toString());
 
-                        //received = Double.valueOf((mText.toString()).trim()).doubleValue();
+                    HandleByte(rbuf[i]);
 
-                        // De-serialise data
-                        //received = ByteBuffer.wrap(mText.toString().getBytes()).getDouble();
-                        //received = ByteBuffer.wrap(mText.toString().getBytes()).asDoubleBuffer().get();
-                        bb.rewind();
-
-
-                        bb.clear();
-                        bb.put((byte) '0');
-                        bb.put((byte)'.');
-                        bb.put((byte)'1');
-                        received = bb.getDouble(0);
-
-                        DisplayString(Double.toString(received));
-                        mText.delete(0, mText.length());
-                        bb.clear();
-                    }
                 }
 
                 if (len > 0) {
@@ -364,13 +338,8 @@ public class MainActivity extends ActionBarActivity {
         @Override
         public void run() {
 
-            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream(1024);
             byte[] buffer = new byte[1];
-            int bytesRead;
             InputStream inputStream = null;
-            String response = "";
-            final StringBuilder mText = new StringBuilder();
-            final ByteBuffer bb = ByteBuffer.allocate(1000);
 
             try {
                 InetAddress serverAddr = InetAddress.getByName(IP);
@@ -399,121 +368,16 @@ public class MainActivity extends ActionBarActivity {
                 read = false;
             }
 
-            int Bytes;
-            int state = 0;
-            int loopCounter = 0;
-            int mode = 0;
-            int range = 0;
-            int checksum = 0;
-            String str;
             while (read) {
                 try {
-                    if ((Bytes = inputStream.read(buffer)) > 0) {
+                    if (inputStream.read(buffer) > 0) {
 
-                        switch (state) {
+                        HandleByte(buffer[0]);
 
-                            case 0:
-                                if ((char) buffer[0] == 'D') { // check for start byte
-                                    checksum = checksum ^ buffer[0];
-                                    state = 1;
-                                }
-                                break;
-
-                            case 1:
-                                if ((char) buffer[0] == '1') { // only data type '1' currently supported
-                                    checksum = checksum ^ buffer[0];
-                                    state = 2;
-                                }
-                                else {
-                                    checksum = 0;
-                                    state = 0; // treat as misscommunication if not '1'
-                                }
-                                break;
-
-                            case 2:
-                                // receive data
-                                bb.put(buffer[0]);
-                                checksum = checksum ^ buffer[0];
-                                loopCounter++;
-                                if (loopCounter >= 8) {
-                                    loopCounter = 0;
-                                    state = 3;
-                                }
-                                break;
-
-                            case 3:
-                                // receive range
-                                range = (int)buffer[0];
-                                checksum = checksum ^ buffer[0];
-                                state = 4;
-                                break;
-
-                            case 4:
-                                // receive mode
-                                mode = (int)buffer[0];
-                                checksum = checksum ^ buffer[0];
-                                state = 5;
-                                break;
-
-                            case 5:
-                                // checksum
-                                if (checksum == (int)buffer[0]) {
-                                    checksum = (int) buffer[0];
-
-                                    bb.rewind();
-                                    received = bb.getDouble(0);
-                                    str = "";
-                                    str = (str + "Double: ");
-                                    str = (str + String.format("%.5f\n", received));
-
-                                    str = (str + "Range: ");
-                                    str = (str + String.format("%d\n", range));
-
-                                    str = (str + "Mode: ");
-                                    str = (str + String.format("%d\n", mode));
-
-                                    str = (str + "Checksum: ");
-                                    str = (str + String.format("%d\n", checksum));
-
-                                    DisplayString(str);
-                                }
-                                else {
-                                    DisplayString("Checksum failed!");
-                                }
-                                checksum = 0x00;
-                                bb.clear();
-                                state = 0;
-                                break;
-
-                        }
-
-                        /*
-                        mText.append((char)buffer[0]);
-                        bb.put(buffer[0]);
-                        if ((char)buffer[0] == '\n') {
-                            String str = String.format("Received: %d bytes\n", mText.length());
-                            //DisplayString(mText.toString());
-
-                            if (mText.length() >= 8) {
-                                str = (str + "Bytes: ");
-                                for (int i=0; i<mText.length(); i++) {
-                                    byte tempbyte = bb.get(i);
-                                    str = (str + String.format("0x%x, ", tempbyte));
-                                }
-                                str = (str + "\nDouble: ");
-                                bb.rewind();
-                                received = bb.getDouble(0);
-                                str = (str + String.format("%.5f", received));
-                                DisplayString(str);
-                                mText.delete(0, mText.length());
-                                bb.clear();
-                            }
-                        }
-                        */
                     }
                 } catch (SocketTimeoutException e) {
                     e.printStackTrace();
-                    //ThreadToast("Timeout");
+                    ThreadToast("Timeout");
                 } catch (IOException e) {
                     // Expected exception
                     ThreadToast("IO exception");
@@ -535,8 +399,98 @@ public class MainActivity extends ActionBarActivity {
     }
 
 
+    //====================================//
+    //========== State Machine  ==========//
+    //====================================//
 
+    final ByteBuffer bb = ByteBuffer.allocate(1000);
+    int state = 0;
+    int loopCounter = 0;
+    int mode = 0;
+    int range = 0;
+    int checksum = 0;
 
+    public void HandleByte(byte data) {
+
+        switch (state) {
+
+            case 0:
+                if ((char) data == 'D') { // check for start byte
+                    checksum = checksum ^ data;
+                    state = 1;
+                }
+                break;
+
+            case 1:
+                if ((char) data == '1') { // only data type '1' currently supported
+                    checksum = checksum ^ data;
+                    state = 2;
+                }
+                else {
+                    checksum = 0;
+                    state = 0; // treat as misscommunication if not '1'
+                }
+                break;
+
+            case 2:
+                // receive data
+                bb.put(data);
+                checksum = checksum ^ data;
+                loopCounter++;
+                if (loopCounter >= 8) {
+                    loopCounter = 0;
+                    state = 3;
+                }
+                break;
+
+            case 3:
+                // receive range
+                range = (int)data;
+                checksum = checksum ^ data;
+                state = 4;
+                break;
+
+            case 4:
+                // receive mode
+                mode = (int)data;
+                checksum = checksum ^ data;
+                state = 5;
+                break;
+
+            case 5:
+                // checksum
+                if (checksum == (int)data) {
+                    checksum = (int)data;
+                    String str;
+
+                    bb.rewind();
+                    received = bb.getDouble(0);
+                    str = "";
+                    str = (str + "Double: ");
+                    str = (str + String.format("%.5f\n", received));
+
+                    str = (str + "Range: ");
+                    str = (str + String.format("%d\n", range));
+
+                    str = (str + "Mode: ");
+                    str = (str + String.format("%d\n", mode));
+
+                    str = (str + "Checksum: ");
+                    str = (str + String.format("%d\n", checksum));
+
+                    DisplayString(str);
+                }
+                else {
+                    DisplayString("Checksum failed!");
+                }
+                checksum = 0x00;
+                bb.clear();
+                state = 0;
+                break;
+
+        }
+
+    }
 
     //====================================//
     //======= Supporting functions =======//
