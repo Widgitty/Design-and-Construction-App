@@ -64,6 +64,8 @@ public class MainActivity extends ActionBarActivity {
 
     // Static variables
     public static volatile double received = 0.1;
+    public static volatile int mode = 0;
+    public static volatile int range = 0;
 
 
 
@@ -406,8 +408,7 @@ public class MainActivity extends ActionBarActivity {
     final ByteBuffer bb = ByteBuffer.allocate(1000);
     int state = 0;
     int loopCounter = 0;
-    int mode = 0;
-    int range = 0;
+
     int checksum = 0;
 
     public void HandleByte(byte data) {
@@ -461,22 +462,55 @@ public class MainActivity extends ActionBarActivity {
                 // checksum
                 if (checksum == (int)data) {
                     checksum = (int)data;
+                    String units;
                     String str;
 
                     bb.rewind();
                     received = bb.getDouble(0);
                     str = "";
+                    units = "";
                     str = (str + "Double: ");
                     str = (str + String.format("%.5f\n", received));
 
                     str = (str + "Range: ");
                     str = (str + String.format("%d\n", range));
+                    switch (range) {
+                        case 0:
+                            units = "";
+                            break;
+                        case 1:
+                            units = "m";
+                            break;
+                        case 2:
+                            units = "k";
+                            break;
+                        default:
+                            units = "?";
+                            break;
+                    }
 
                     str = (str + "Mode: ");
                     str = (str + String.format("%d\n", mode));
+                    switch (mode) {
+                        case 0:
+                            units = (units + "A");
+                            break;
+                        case 1:
+                            units = (units + "V");
+                            break;
+                        case 2:
+                            units = (units + "Ohms");
+                            break;
+                        default:
+                            units = (units + "?");
+                            break;
+                    }
 
                     str = (str + "Checksum: ");
                     str = (str + String.format("%d\n", checksum));
+
+                    str = (str + "\nOutput:\n");
+                    str = (str + String.format("%.5f %s\n", received, units));
 
                     DisplayString(str);
                 }

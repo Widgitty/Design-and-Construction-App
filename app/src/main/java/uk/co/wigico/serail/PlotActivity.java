@@ -26,6 +26,7 @@ public class PlotActivity extends ActionBarActivity {
     boolean record = false;
     Button btnStartStop;
     Long startTime = (long)0;
+    int recordingMode = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,8 +48,6 @@ public class PlotActivity extends ActionBarActivity {
         graph.addSeries(data);
 
         btnStartStop = (Button) findViewById(R.id.btnStartStop);
-
-        new Thread(new UpdateThread()).start();
     }
 
     @Override
@@ -81,21 +80,33 @@ public class PlotActivity extends ActionBarActivity {
         @Override
         public void run() {
 
-            while(true) {
+            while(record) {
                 //ThreadToast("Update");
-                if (record) {
+                if (MainActivity.mode == recordingMode) {
                     data.appendData(new DataPoint((elapsedRealtime () - startTime), MainActivity.received), true, count);
                     count++;
                     graph.getViewport().setXAxisBoundsManual(true);
                     graph.getViewport().setMaxX((elapsedRealtime () - startTime));
                     graph.getViewport().setMinX(0);
+
+
+                    try {
+                        Thread.sleep(500);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+                else {
+                    ThreadToast("Mode changed!");
+                    record = false;
+                    btnStartStop.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            btnStartStop.setText("Start");
+                        }
+                    });
                 }
 
-                try {
-                    Thread.sleep(500);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
             }
         }
     }
@@ -108,6 +119,9 @@ public class PlotActivity extends ActionBarActivity {
         }
         else {
             record = true;
+            //data.setAnimated(true);
+            recordingMode = MainActivity.mode;
+            new Thread(new UpdateThread()).start();
             startTime = elapsedRealtime ();
             btnStartStop.setText("Stop");
         }
