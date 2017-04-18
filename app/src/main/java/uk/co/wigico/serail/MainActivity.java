@@ -476,13 +476,22 @@ public class MainActivity extends ActionBarActivity {
                     str = (str + String.format("%d\n", range));
                     switch (range) {
                         case 0:
-                            units = "";
+                            units = "n";
                             break;
                         case 1:
-                            units = "m";
+                            units = "\u03BC"; // mu
                             break;
                         case 2:
+                            units = "m";
+                            break;
+                        case 3:
+                            units = "";
+                            break;
+                        case 4:
                             units = "k";
+                            break;
+                        case 5:
+                            units = "M";
                             break;
                         default:
                             units = "?";
@@ -499,7 +508,16 @@ public class MainActivity extends ActionBarActivity {
                             units = (units + "V");
                             break;
                         case 2:
-                            units = (units + "Ohms");
+                            units = (units + "\u03A9"); //ohms
+                            break;
+                        case 3:
+                            units = (units + "F");
+                            break;
+                        case 4:
+                            units = (units + "H");
+                            break;
+                        case 5:
+                            units = (units + "Hz");
                             break;
                         default:
                             units = (units + "?");
