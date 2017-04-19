@@ -22,6 +22,7 @@
             </intent-filter>
         </activity>
         <activity
+            android:screenOrientation="portrait"
             android:name=".DebugActivity"
             android:label="@string/title_activity_debug" >
         </activity>
