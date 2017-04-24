@@ -2,6 +2,7 @@ package uk.co.wigico.serail;
 
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.support.v7.internal.widget.AdapterViewCompat;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -10,9 +11,13 @@ import android.hardware.usb.UsbManager;
 import android.content.Context;
 import android.content.Intent;
 import android.app.PendingIntent;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RadioButton;
+import android.widget.Spinner;
+import android.widget.SpinnerAdapter;
 import android.widget.Toast;
 import android.view.View;
 import android.widget.Button;
@@ -32,7 +37,9 @@ import java.nio.ByteBuffer;
 import java.util.concurrent.TimeoutException;
 
 
-public class MainActivity extends ActionBarActivity {
+public class MainActivity extends ActionBarActivity implements AdapterView.OnItemSelectedListener {
+
+
 
     public enum Mode_Type {
         AT, FT, WiFi
@@ -57,6 +64,7 @@ public class MainActivity extends ActionBarActivity {
     RadioButton radioButton1;
     RadioButton radioButton2;
     RadioButton radioButton3;
+    Spinner modeSelector;
 
     // [FTDriver] Permission String
     private static final String ACTION_USB_PERMISSION =
@@ -84,15 +92,19 @@ public class MainActivity extends ActionBarActivity {
         radioButton1 = (RadioButton) findViewById(R.id.radio_AT);
         radioButton2 = (RadioButton) findViewById(R.id.radio_FT);
         radioButton3 = (RadioButton) findViewById(R.id.radio_WiFi);
+        modeSelector = (Spinner) findViewById(R.id.modeSelectionSpinner);
 
-        LED[0] = (ImageView) findViewById(R.id.led_1);
+
+
+
+        /*LED[0] = (ImageView) findViewById(R.id.led_1);
         LED[1] = (ImageView) findViewById(R.id.led_2);
         LED[2] = (ImageView) findViewById(R.id.led_3);
         LED[3] = (ImageView) findViewById(R.id.led_4);
         LED[4] = (ImageView) findViewById(R.id.led_5);
         LED[5] = (ImageView) findViewById(R.id.led_6);
         LED[6] = (ImageView) findViewById(R.id.led_7);
-        LED[7] = (ImageView) findViewById(R.id.led_8);
+        LED[7] = (ImageView) findViewById(R.id.led_8);*/
 
         sendMessage = (EditText) findViewById(R.id.sendMessage);
 
@@ -113,6 +125,11 @@ public class MainActivity extends ActionBarActivity {
         PendingIntent permissionIntent = PendingIntent.getBroadcast(this, 0, new Intent(
                 ACTION_USB_PERMISSION), 0);
         mSerial.setPermissionIntent(permissionIntent);
+
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.modes, android.R.layout.simple_spinner_item);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        modeSelector.setAdapter(adapter);
+        modeSelector.setOnItemSelectedListener(this);
     }
 
     @Override
@@ -638,6 +655,58 @@ public class MainActivity extends ActionBarActivity {
                 radioButton3.setEnabled(!mask);
             }
         });
+    }
+
+    /*Spinner Listener, to do something when an item is selected*/
+    @Override
+    public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+
+        String item = adapterView.getItemAtPosition(i).toString();
+        tvMonitor.setText(item);
+
+        switch(item){
+            case "Voltage":
+                item = "m1";
+                break;
+            case"Current":
+                item = "m0";
+                break;
+            case"Resistance":
+                item = "m2";
+                break;
+            case"Capacitance":
+                item = "m3";
+                break;
+            case"Inductance":
+                item = "m4";
+                break;
+            case"Frequency":
+                item = "m5";
+                break;
+            default:
+                break;
+
+        }
+
+        if (Mode == Mode_Type.WiFi) {
+            try {
+                PrintWriter out = new PrintWriter(new BufferedWriter(
+                        new OutputStreamWriter(socket.getOutputStream())),
+                        true);
+                out.println(item);
+            } catch (UnknownHostException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> adapterView) {
+        //Toast.makeText(getApplicationContext(), "No mode selected", Toast.LENGTH_SHORT).show();
     }
 
 

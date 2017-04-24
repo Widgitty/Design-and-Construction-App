@@ -15,4 +15,13 @@
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
     <string name="action_example">Example action</string>
+    
+    <string-array name="modes">
+        <item>Current</item>
+        <item>Voltage</item>
+        <item>Resistance</item>
+        <item>Capacitance</item>
+        <item>Inductance</item>
+        <item>Frequency</item>
+    </string-array>
 </resources>
