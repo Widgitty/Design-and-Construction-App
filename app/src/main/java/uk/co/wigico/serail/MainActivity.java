@@ -240,6 +240,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
 
         if (Mode == Mode_Type.AT) {
 
+            mSerial.write("s");
             mSerial.write(str.getBytes());
             mSerial.write("\n");
 
@@ -252,7 +253,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
                 PrintWriter out = new PrintWriter(new BufferedWriter(
                         new OutputStreamWriter(socket.getOutputStream())),
                         true);
-                out.println(str);
+                out.println("s" + str);
             } catch (UnknownHostException e) {
                 e.printStackTrace();
             } catch (IOException e) {

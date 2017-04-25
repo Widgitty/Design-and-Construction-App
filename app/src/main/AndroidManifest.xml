@@ -27,6 +27,7 @@
             android:label="@string/title_activity_debug" >
         </activity>
         <activity
+            android:configChanges="keyboardHidden|orientation|screenSize"
             android:name=".PlotActivity"
             android:label="@string/title_activity_plot" >
         </activity>
