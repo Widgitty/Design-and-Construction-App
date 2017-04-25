@@ -325,21 +325,18 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
             byte[] rbuf = new byte[4096]; // 1byte <--slow-- [Transfer Speed] --fast--> 4096 byte
 
             while (read) {
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
                 len = mSerial.read(rbuf);
 
                 for (i = 0; i < len; i++) {
 
                     HandleByte(rbuf[i]);
 
-                }
-
-                if (len > 0) {
-                    LEDs = (char) rbuf[len - 1];
-
-                    // This function communicates back to the UI components by passing a
-                    // runnable function to the component, as described in the Android
-                    // documentation.
-                    updateLEDs(LEDs);
                 }
             }
 
