@@ -56,10 +56,30 @@ public class DebugActivity extends ActionBarActivity {
 
     public void onDialClick(View view) {
         mode++;
-        if (mode > 2) {
+        if (mode > 5) {
             mode = 0;
         }
-        screenText.setText(Integer.toString(mode));
-        dial.setRotation((mode*20)-20);
+        switch(mode){
+            case 0:
+                screenText.setText("Current");
+                break;
+            case 1:
+                screenText.setText("Voltage");
+                break;
+            case 2:
+                screenText.setText("Resistance");
+                break;
+            case 3:
+                screenText.setText("Capacitance");
+                break;
+            case 4:
+                screenText.setText("Inductance");
+                break;
+            case 5:
+                screenText.setText("Frequency");
+                break;
+        }
+
+        dial.setRotation((mode*20)-50);
     }
 }
