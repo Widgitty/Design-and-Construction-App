@@ -22,19 +22,45 @@ public class DebugActivity extends ActionBarActivity {
     ImageButton dial;
     TextView screenText;
     TextView resultText;
+    boolean modeSet;
 
     int mode = 0;
 
     private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+            final int newMode = intent.getIntExtra("modeUpdate", 0);
             final String message = intent.getStringExtra("message");
-            resultText.post(new Runnable() {
-                @Override
-                public void run() {
-                    resultText.setText(message);
-                }
-            });
+            final String range = intent.getStringExtra("range");
+            if(mode < 7)
+                resultText.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        resultText.setText(message + range);
+                    }
+                });
+            else {
+                resultText.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        resultText.setText(" ");
+                    }
+                });
+            }
+        }
+    };
+    private BroadcastReceiver mModeReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            final int newMode = intent.getIntExtra("modeUpdate", 0);
+            mode = newMode;
+            if(!modeSet) {
+                updateText(mode);
+                dial.setRotation(mode * 40 - 90);
+
+            }
+            modeSet = false;
+
         }
     };
 
@@ -53,6 +79,8 @@ public class DebugActivity extends ActionBarActivity {
         dial.setRotation(-90);
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver,
                 new IntentFilter("dataUpdate"));
+        LocalBroadcastManager.getInstance(this).registerReceiver(mModeReceiver,
+                new IntentFilter("modeUpdate"));
 
     }
 
@@ -78,53 +106,48 @@ public class DebugActivity extends ActionBarActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    private void updateText(int tempMode){
+        switch(tempMode) {
+            case 0:
+                screenText.setText("Current");
+                break;
+            case 1:
+                screenText.setText("Voltage");
+                break;
+            case 2:
+                screenText.setText("Voltage RMS");
+                break;
+            case 3:
+                screenText.setText("Resistance");
+                break;
+            case 4:
+                screenText.setText("Capacitance");
+                break;
+            case 5:
+                screenText.setText("Inductance");
+                break;
+            case 6:
+                screenText.setText("Frequency");
+                break;
+            case 7:
+                screenText.setText("Continuity Test");
+                break;
+            case 8:
+                screenText.setText("Diode Test");
+                break;
+        }
+    }
+
     public void onDialClick(View view) {
         mode++;
         if (mode > 8) {
             mode = 0;
         }
+        updateText(mode);
+        modeSet = true;
 
-        String textMode = "Current";
-        switch(mode) {
-            case 0:
-                screenText.setText("Current");
-                textMode = "Current";
-                break;
-            case 1:
-                screenText.setText("Voltage");
-                textMode = "Voltage";
-                break;
-            case 2:
-                screenText.setText("Voltage RMS");
-                textMode = "Voltage RMS";
-                break;
-            case 3:
-                screenText.setText("Resistance");
-                textMode = "Resistance";
-                break;
-            case 4:
-                screenText.setText("Capacitance");
-                textMode = "Capacitance";
-                break;
-            case 5:
-                screenText.setText("Inductance");
-                textMode = "Inductance";
-                break;
-            case 6:
-                screenText.setText("Frequency");
-                textMode = "Frequency";
-                break;
-            case 7:
-                screenText.setText("Continuity Test");
-                textMode = "Continuity Test";
-                break;
-            case 8:
-                screenText.setText("Diode Test");
-                textMode = "Diode Test";
-                break;
-        }
 
         dial.setRotation(40*mode - 90);
-        SetData(textMode,getApplicationContext());
+        SetData(mode,getApplicationContext());
     }
 }

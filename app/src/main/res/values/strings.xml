@@ -19,9 +19,12 @@
     <string-array name="modes">
         <item>Current</item>
         <item>Voltage</item>
+        <item>Voltage RMS</item>
         <item>Resistance</item>
         <item>Capacitance</item>
         <item>Inductance</item>
         <item>Frequency</item>
+        <item>Continuity Test</item>
+        <item>Diode Test</item>
     </string-array>
 </resources>

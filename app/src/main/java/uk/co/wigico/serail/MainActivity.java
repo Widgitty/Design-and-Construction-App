@@ -36,6 +36,7 @@ import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
+import java.text.DecimalFormat;
 import java.util.concurrent.TimeoutException;
 
 
@@ -76,6 +77,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
     // Static variables
     public static volatile double received = 0.1;
     public static volatile int mode = 0;
+    public static volatile int oldMode = 0;
     public static volatile int range = 0;
 
 
@@ -543,15 +545,18 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
                             units = (units + "V");
                             break;
                         case 2:
-                            units = (units + "\u03A9"); //ohms
+                            units = (units + "V");
                             break;
                         case 3:
-                            units = (units + "F");
+                            units = (units + "\u03A9"); //ohms
                             break;
                         case 4:
-                            units = (units + "H");
+                            units = (units + "F");
                             break;
                         case 5:
+                            units = (units + "H");
+                            break;
+                        case 6:
                             units = (units + "Hz");
                             break;
                         default:
@@ -566,7 +571,10 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
                     str = (str + String.format("%.5f %s\n", received, units));
 
                     DisplayString(str);
-                    sendDataBroadCast(received);
+                    sendDataBroadCast(received, units);
+                    if(oldMode != mode)
+                        sendModeBroadcast(mode);
+                    oldMode = mode;
                 }
                 else {
                     DisplayString("Checksum failed!");
@@ -683,7 +691,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
         String item = adapterView.getItemAtPosition(i).toString();
         tvMonitor.setText(item);
 
-        SetData(item, getApplicationContext());
+        SetData(i, getApplicationContext());
     }
 
     @Override
@@ -704,41 +712,10 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
         return received;
     }
 
-    public static void SetData(String input, Context context){
+    public static void SetData(int input, Context context){
 
         String item;
-        switch(input){
-            case "Voltage":
-                item = "m1";
-                break;
-            case "Current":
-                item = "m0";
-                break;
-            case "Resistance":
-                item = "m2";
-                break;
-            case "Capacitance":
-                item = "m3";
-                break;
-            case "Inductance":
-                item = "m4";
-                break;
-            case "Frequency":
-                item = "m5";
-                break;
-            case "Voltage RMS":
-                item = "m7";
-                break;
-            case "Diode Test":
-                item = "m8";
-                break;
-            case "Continuity Test":
-                item = "m6";
-                break;
-            default:
-                item = "m0";
-                break;
-        }
+        item = "m" + Integer.toString(input);
 
         Log.d("LOG", item);
 
@@ -764,10 +741,19 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
         }
     }
 
-    private void sendDataBroadCast(double value) {
+    private void sendDataBroadCast(double value, String input) {
         Intent intent = new Intent("dataUpdate");
         // You can also include some extra data.
-        intent.putExtra("message", Double.toString(value));
+
+        intent.putExtra("message", new DecimalFormat("#.###").format(value));
+        intent.putExtra("range", input);
+        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+    }
+    private void sendModeBroadcast(int mode) {
+        Intent intent = new Intent("modeUpdate");
+        // You can also include some extra data.
+
+        intent.putExtra("modeUpdate", mode);
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
     }
 }
