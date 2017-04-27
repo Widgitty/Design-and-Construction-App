@@ -1,6 +1,10 @@
 package uk.co.wigico.serail;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
@@ -10,31 +14,45 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import static uk.co.wigico.serail.MainActivity.SetData;
+
 
 public class DebugActivity extends ActionBarActivity {
 
     ImageButton dial;
     TextView screenText;
+    TextView resultText;
 
-    Intent intent;
-    Bundle extras;
     int mode = 0;
-    int connectionMode = 0;
+
+    private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            final String message = intent.getStringExtra("message");
+            resultText.post(new Runnable() {
+                @Override
+                public void run() {
+                    resultText.setText(message);
+                }
+            });
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_debug);
 
         // Import UI components
-        intent = getIntent();
-        extras = intent.getExtras();
-        connectionMode = extras.getInt("connectionType" , 0);
         dial = (ImageButton) findViewById(R.id.imageViewDial);
         screenText = (TextView) findViewById(R.id.textViewScreen);
+        resultText = (TextView) findViewById(R.id.textViewResult);
         //screenText.setText(Double.toString(MainActivity.GetData()));
         screenText.setText(Double.toString(MainActivity.received));
-        screenText.setText(Integer.toString(connectionMode));
         Toast.makeText(this, Double.toString(MainActivity.received), Toast.LENGTH_SHORT).show();
+        dial.setRotation(-90);
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver,
+                new IntentFilter("dataUpdate"));
 
     }
 
@@ -60,37 +78,53 @@ public class DebugActivity extends ActionBarActivity {
         return super.onOptionsItemSelected(item);
     }
 
-
     public void onDialClick(View view) {
         mode++;
-        if (mode > 5) {
+        if (mode > 8) {
             mode = 0;
         }
+
+        String textMode = "Current";
         switch(mode) {
             case 0:
                 screenText.setText("Current");
+                textMode = "Current";
                 break;
             case 1:
                 screenText.setText("Voltage");
+                textMode = "Voltage";
                 break;
             case 2:
-                screenText.setText("Resistance");
+                screenText.setText("Voltage RMS");
+                textMode = "Voltage RMS";
                 break;
             case 3:
-                screenText.setText("Capacitance");
+                screenText.setText("Resistance");
+                textMode = "Resistance";
                 break;
             case 4:
-                screenText.setText("Inductance");
+                screenText.setText("Capacitance");
+                textMode = "Capacitance";
                 break;
             case 5:
+                screenText.setText("Inductance");
+                textMode = "Inductance";
+                break;
+            case 6:
                 screenText.setText("Frequency");
+                textMode = "Frequency";
+                break;
+            case 7:
+                screenText.setText("Continuity Test");
+                textMode = "Continuity Test";
+                break;
+            case 8:
+                screenText.setText("Diode Test");
+                textMode = "Diode Test";
                 break;
         }
 
-        dial.setRotation((mode*36)-90);
-        if(connectionMode == 2){
-
-        }
-
+        dial.setRotation(40*mode - 90);
+        SetData(textMode,getApplicationContext());
     }
 }

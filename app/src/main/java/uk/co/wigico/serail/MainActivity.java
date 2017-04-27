@@ -1,8 +1,10 @@
 package uk.co.wigico.serail;
 
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.support.v7.internal.widget.AdapterViewCompat;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -48,10 +50,11 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
     public static volatile FTDriver mSerial;
     public static volatile boolean read = false;
     char LEDs = 0x00;
-    Mode_Type Mode = Mode_Type.AT;
+    static Mode_Type Mode = Mode_Type.AT;
 
     // TCP stuff
-    private Socket socket;
+    private static Socket socket;
+    public static boolean SerialFlag = false;
     private static final int PORT = 1138;
     private static final String IP = "192.168.1.1";
 
@@ -330,6 +333,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
                 // TODO: Make a function to do this properly
                 MaskButtonsConnected(true);
                 ThreadToast("Connected");
+                SerialFlag = true;
                 read = true;
             } else {
                 ThreadToast("Cannot connect");
@@ -361,6 +365,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
             mSerial.end();
             MaskButtonsConnected(false);
             ThreadToast("Disconnected");
+            SerialFlag = false;
 
         }
     }
@@ -393,11 +398,11 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
 
             } catch (UnknownHostException e) {
                 e.printStackTrace();
-                ThreadToast("Failed to connect to socket");
+                ThreadToast("Board not found");
                 read = false;
             } catch (IOException e) {
                 e.printStackTrace();
-                ThreadToast("IO Exception");
+                ThreadToast("Board not found");
                 read = false;
             }
 
@@ -410,10 +415,9 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
                     }
                 } catch (SocketTimeoutException e) {
                     e.printStackTrace();
-                    ThreadToast("Timeout");
                 } catch (IOException e) {
                     // Expected exception
-                    ThreadToast("IO exception");
+                    ThreadToast("Board not found");
                 }
             }
 
@@ -562,6 +566,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
                     str = (str + String.format("%.5f %s\n", received, units));
 
                     DisplayString(str);
+                    sendDataBroadCast(received);
                 }
                 else {
                     DisplayString("Checksum failed!");
@@ -678,43 +683,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
         String item = adapterView.getItemAtPosition(i).toString();
         tvMonitor.setText(item);
 
-        switch(item){
-            case "Voltage":
-                item = "m1";
-                break;
-            case"Current":
-                item = "m0";
-                break;
-            case"Resistance":
-                item = "m2";
-                break;
-            case"Capacitance":
-                item = "m3";
-                break;
-            case"Inductance":
-                item = "m4";
-                break;
-            case"Frequency":
-                item = "m5";
-                break;
-            default:
-                break;
-        }
-
-        if (Mode == Mode_Type.WiFi) {
-            try {
-                PrintWriter out = new PrintWriter(new BufferedWriter(
-                        new OutputStreamWriter(socket.getOutputStream())),
-                        true);
-                out.println(item);
-            } catch (UnknownHostException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
+        SetData(item, getApplicationContext());
     }
 
     @Override
@@ -734,5 +703,73 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
     public static double GetData() {
         return received;
     }
+
+    public static void SetData(String input, Context context){
+
+        String item;
+        switch(input){
+            case "Voltage":
+                item = "m1";
+                break;
+            case "Current":
+                item = "m0";
+                break;
+            case "Resistance":
+                item = "m2";
+                break;
+            case "Capacitance":
+                item = "m3";
+                break;
+            case "Inductance":
+                item = "m4";
+                break;
+            case "Frequency":
+                item = "m5";
+                break;
+            case "Voltage RMS":
+                item = "m7";
+                break;
+            case "Diode Test":
+                item = "m8";
+                break;
+            case "Continuity Test":
+                item = "m6";
+                break;
+            default:
+                item = "m0";
+                break;
+        }
+
+        Log.d("LOG", item);
+
+        if ((Mode == Mode_Type.AT) && SerialFlag) {
+            mSerial.write(item);
+            mSerial.write("\n");
+        }
+        else if (Mode == Mode_Type.FT) {
+            Toast.makeText(context, "FTDI chip not supported", Toast.LENGTH_SHORT).show();
+        }
+        else if (Mode == Mode_Type.WiFi) {
+            try {
+                PrintWriter out = new PrintWriter(new BufferedWriter(
+                        new OutputStreamWriter(socket.getOutputStream())), true);
+                out.println(item);
+            } catch (UnknownHostException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void sendDataBroadCast(double value) {
+        Intent intent = new Intent("dataUpdate");
+        // You can also include some extra data.
+        intent.putExtra("message", Double.toString(value));
+        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+    }
 }
+
 
