@@ -160,7 +160,7 @@ public class PlotActivity extends ActionBarActivity {
                 outputStream.write(Double.toString(dataPoint.getX()).getBytes());
                 outputStream.write(", ".getBytes());
                 outputStream.write(Double.toString(dataPoint.getY()).getBytes());
-                outputStream.write("<br>\n".getBytes());
+                outputStream.write("\n".getBytes());
             }
 
             outputStream.close();
