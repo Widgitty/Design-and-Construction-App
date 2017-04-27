@@ -1,5 +1,6 @@
 package uk.co.wigico.serail;
 
+import android.os.Environment;
 import android.provider.ContactsContract;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
@@ -15,6 +16,10 @@ import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
 import com.jjoe64.graphview.DefaultLabelFormatter;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.Timer;
 
 import static android.os.SystemClock.elapsedRealtime;
@@ -164,6 +169,7 @@ public class PlotActivity extends ActionBarActivity{
         }
     }
 
+
     public void onRadioButtonClicked(View view) {
         // Is the button now checked?
         boolean checked = ((RadioButton) view).isChecked();
@@ -184,9 +190,44 @@ public class PlotActivity extends ActionBarActivity{
         }
     }
 
+
     public void onSaveClick(View view) {
-        ThreadToast("Save");
+
+        //Toast.makeText(getApplicationContext(), "Save", Toast.LENGTH_SHORT).show();
+        FileOutputStream outputStream;
+
+        //String fileName = ((EditText) findViewById(R.id.edit_file)).getText().toString();
+        String fileName = "OUTPUT.csv";
+
+        if (!fileName.endsWith(".csv")) {
+            fileName = String.format("%s.csv", fileName);
+        }
+
+        File sdCard = Environment.getExternalStorageDirectory();
+        File dir = new File (sdCard.getAbsolutePath() + "/Wigico/Serail");
+        dir.mkdirs();
+        File file = new File(dir, fileName);
+
+        try {
+            outputStream = new FileOutputStream(file);
+
+            Iterator<DataPoint> iterator = data.getValues(data.getLowestValueX(), data.getHighestValueX());
+            while (iterator.hasNext()) {
+                DataPoint dataPoint = iterator.next();
+                outputStream.write(Double.toString(dataPoint.getX()).getBytes());
+                outputStream.write(", ".getBytes());
+                outputStream.write(Double.toString(dataPoint.getY()).getBytes());
+                outputStream.write("\n".getBytes());
+            }
+
+            outputStream.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        setResult(RESULT_CANCELED);
+        ThreadToast("Saved");
     }
+
 
 
     public void ThreadToast (String str) {
