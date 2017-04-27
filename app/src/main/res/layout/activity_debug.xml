@@ -33,11 +33,20 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="Large Text"
+        android:text="Mode"
         android:id="@+id/textViewScreen"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="82dp" />
+        android:layout_marginTop="70dp" />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="data"
+        android:id="@+id/textViewResult"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="100dp" />
 
     <ImageButton
         android:layout_width="wrap_content"
@@ -50,6 +59,13 @@
         android:layout_alignBottom="@+id/imageViewBody"
         android:layout_centerHorizontal="false" />
 
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/dial_units"
+        android:layout_centerHorizontal="true"
+        android:layout_alignBottom="@+id/imageViewBody"
+        android:layout_marginBottom="100dp"/>
     <ImageButton
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -60,7 +76,4 @@
         android:layout_marginBottom="150dp"
         android:layout_alignBottom="@+id/imageViewBody"
         android:layout_centerHorizontal="true" />
-
-
-
 </RelativeLayout>

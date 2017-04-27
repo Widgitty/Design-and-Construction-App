@@ -1,8 +1,10 @@
 package uk.co.wigico.serail;
 
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.support.v7.internal.widget.AdapterViewCompat;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -34,6 +36,7 @@ import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
+import java.text.DecimalFormat;
 import java.util.concurrent.TimeoutException;
 
 
@@ -48,10 +51,11 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
     public static volatile FTDriver mSerial;
     public static volatile boolean read = false;
     char LEDs = 0x00;
-    Mode_Type Mode = Mode_Type.AT;
+    static Mode_Type Mode = Mode_Type.AT;
 
     // TCP stuff
-    private Socket socket;
+    private static Socket socket;
+    public static boolean SerialFlag = false;
     private static final int PORT = 1138;
     private static final String IP = "192.168.1.1";
 
@@ -73,6 +77,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
     // Static variables
     public static volatile double received = 0.1;
     public static volatile int mode = 0;
+    public static volatile int oldMode = 0;
     public static volatile int range = 0;
 
 
@@ -130,6 +135,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         modeSelector.setAdapter(adapter);
         modeSelector.setOnItemSelectedListener(this);
+
     }
 
     @Override
@@ -146,6 +152,18 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
         // as you specify a parent activity in AndroidManifest.xml.
 
         Intent intent;
+        Bundle connectionType= new Bundle();
+        if(Mode == Mode_Type.AT){
+            connectionType.putInt("connectionType", 0);
+        }
+        else if(Mode == Mode_Type.FT){
+            connectionType.putInt("connectionType", 1);
+
+        }
+        else{
+            connectionType.putInt("connectionType", 2);
+
+        }
 
         switch (item.getItemId()) {
             case R.id.action_favorite:
@@ -157,6 +175,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
                 //Toast.makeText(this, "Debug", Toast.LENGTH_SHORT).show();
 
                 intent = new Intent(this, DebugActivity.class);
+                intent.putExtras(connectionType);
                 //EditText editText = (EditText) findViewById(R.id.edit_message);
                 //String message = editText.getText().toString();
                 //intent.putExtra(EXTRA_MESSAGE, message);
@@ -219,7 +238,6 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
     //====================================//
 
     public void onBeginClick(View view) {
-
         if (Mode == Mode_Type.AT) {
             new Thread(new ATSerialThread()).start();
         }
@@ -230,6 +248,8 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
             // TODO: Add socket support
             new Thread(new WiFiThread()).start();
         }
+
+
     }
 
 
@@ -292,6 +312,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
                     Mode = Mode_Type.WiFi;
                 break;
         }
+
     }
 
 
@@ -314,6 +335,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
                 // TODO: Make a function to do this properly
                 MaskButtonsConnected(true);
                 ThreadToast("Connected");
+                SerialFlag = true;
                 read = true;
             } else {
                 ThreadToast("Cannot connect");
@@ -345,6 +367,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
             mSerial.end();
             MaskButtonsConnected(false);
             ThreadToast("Disconnected");
+            SerialFlag = false;
 
         }
     }
@@ -377,11 +400,11 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
 
             } catch (UnknownHostException e) {
                 e.printStackTrace();
-                ThreadToast("Failed to connect to socket");
+                ThreadToast("Board not found");
                 read = false;
             } catch (IOException e) {
                 e.printStackTrace();
-                ThreadToast("IO Exception");
+                ThreadToast("Board not found");
                 read = false;
             }
 
@@ -394,10 +417,9 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
                     }
                 } catch (SocketTimeoutException e) {
                     e.printStackTrace();
-                    ThreadToast("Timeout");
                 } catch (IOException e) {
                     // Expected exception
-                    ThreadToast("IO exception");
+                    ThreadToast("Board not found");
                 }
             }
 
@@ -523,15 +545,18 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
                             units = (units + "V");
                             break;
                         case 2:
-                            units = (units + "\u03A9"); //ohms
+                            units = (units + "V");
                             break;
                         case 3:
-                            units = (units + "F");
+                            units = (units + "\u03A9"); //ohms
                             break;
                         case 4:
-                            units = (units + "H");
+                            units = (units + "F");
                             break;
                         case 5:
+                            units = (units + "H");
+                            break;
+                        case 6:
                             units = (units + "Hz");
                             break;
                         default:
@@ -546,6 +571,10 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
                     str = (str + String.format("%.5f %s\n", received, units));
 
                     DisplayString(str);
+                    sendDataBroadCast(received, units);
+                    if(oldMode != mode)
+                        sendModeBroadcast(mode);
+                    oldMode = mode;
                 }
                 else {
                     DisplayString("Checksum failed!");
@@ -662,44 +691,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
         String item = adapterView.getItemAtPosition(i).toString();
         tvMonitor.setText(item);
 
-        switch(item){
-            case "Voltage":
-                item = "m1";
-                break;
-            case"Current":
-                item = "m0";
-                break;
-            case"Resistance":
-                item = "m2";
-                break;
-            case"Capacitance":
-                item = "m3";
-                break;
-            case"Inductance":
-                item = "m4";
-                break;
-            case"Frequency":
-                item = "m5";
-                break;
-            default:
-                break;
-
-        }
-
-        if (Mode == Mode_Type.WiFi) {
-            try {
-                PrintWriter out = new PrintWriter(new BufferedWriter(
-                        new OutputStreamWriter(socket.getOutputStream())),
-                        true);
-                out.println(item);
-            } catch (UnknownHostException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
+        SetData(i, getApplicationContext());
     }
 
     @Override
@@ -719,5 +711,51 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
     public static double GetData() {
         return received;
     }
+
+    public static void SetData(int input, Context context){
+
+        String item;
+        item = "m" + Integer.toString(input);
+
+        Log.d("LOG", item);
+
+        if ((Mode == Mode_Type.AT) && SerialFlag) {
+            mSerial.write(item);
+            mSerial.write("\n");
+        }
+        else if (Mode == Mode_Type.FT) {
+            Toast.makeText(context, "FTDI chip not supported", Toast.LENGTH_SHORT).show();
+        }
+        else if (Mode == Mode_Type.WiFi) {
+            try {
+                PrintWriter out = new PrintWriter(new BufferedWriter(
+                        new OutputStreamWriter(socket.getOutputStream())), true);
+                out.println(item);
+            } catch (UnknownHostException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void sendDataBroadCast(double value, String input) {
+        Intent intent = new Intent("dataUpdate");
+        // You can also include some extra data.
+
+        intent.putExtra("message", new DecimalFormat("#.###").format(value));
+        intent.putExtra("range", input);
+        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+    }
+    private void sendModeBroadcast(int mode) {
+        Intent intent = new Intent("modeUpdate");
+        // You can also include some extra data.
+
+        intent.putExtra("modeUpdate", mode);
+        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+    }
 }
+
 
