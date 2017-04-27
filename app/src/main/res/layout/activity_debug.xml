@@ -72,7 +72,7 @@
         android:id="@+id/imageViewDial"
         android:background="@null"
         android:onClick="onDialClick"
-        android:src="@drawable/dial"
+        android:src="@drawable/dial1"
         android:layout_marginBottom="150dp"
         android:layout_alignBottom="@+id/imageViewBody"
         android:layout_centerHorizontal="true" />
