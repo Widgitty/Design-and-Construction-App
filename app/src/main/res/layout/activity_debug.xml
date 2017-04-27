@@ -50,6 +50,13 @@
         android:layout_alignBottom="@+id/imageViewBody"
         android:layout_centerHorizontal="false" />
 
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/dial_units"
+        android:layout_centerHorizontal="true"
+        android:layout_alignBottom="@+id/imageViewBody"
+        android:layout_marginBottom="100dp"/>
     <ImageButton
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

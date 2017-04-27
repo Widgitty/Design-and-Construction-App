@@ -1,5 +1,6 @@
 package uk.co.wigico.serail;
 
+import android.content.Intent;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
@@ -15,18 +16,24 @@ public class DebugActivity extends ActionBarActivity {
     ImageButton dial;
     TextView screenText;
 
+    Intent intent;
+    Bundle extras;
     int mode = 0;
-
+    int connectionMode = 0;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_debug);
 
         // Import UI components
+        intent = getIntent();
+        extras = intent.getExtras();
+        connectionMode = extras.getInt("connectionType" , 0);
         dial = (ImageButton) findViewById(R.id.imageViewDial);
         screenText = (TextView) findViewById(R.id.textViewScreen);
         //screenText.setText(Double.toString(MainActivity.GetData()));
         screenText.setText(Double.toString(MainActivity.received));
+        screenText.setText(Integer.toString(connectionMode));
         Toast.makeText(this, Double.toString(MainActivity.received), Toast.LENGTH_SHORT).show();
 
     }
@@ -59,7 +66,7 @@ public class DebugActivity extends ActionBarActivity {
         if (mode > 5) {
             mode = 0;
         }
-        switch(mode){
+        switch(mode) {
             case 0:
                 screenText.setText("Current");
                 break;
@@ -80,6 +87,10 @@ public class DebugActivity extends ActionBarActivity {
                 break;
         }
 
-        dial.setRotation((mode*20)-50);
+        dial.setRotation((mode*36)-90);
+        if(connectionMode == 2){
+
+        }
+
     }
 }

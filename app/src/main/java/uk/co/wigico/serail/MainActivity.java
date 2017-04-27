@@ -130,6 +130,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         modeSelector.setAdapter(adapter);
         modeSelector.setOnItemSelectedListener(this);
+
     }
 
     @Override
@@ -146,6 +147,18 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
         // as you specify a parent activity in AndroidManifest.xml.
 
         Intent intent;
+        Bundle connectionType= new Bundle();
+        if(Mode == Mode_Type.AT){
+            connectionType.putInt("connectionType", 0);
+        }
+        else if(Mode == Mode_Type.FT){
+            connectionType.putInt("connectionType", 1);
+
+        }
+        else{
+            connectionType.putInt("connectionType", 2);
+
+        }
 
         switch (item.getItemId()) {
             case R.id.action_favorite:
@@ -157,6 +170,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
                 //Toast.makeText(this, "Debug", Toast.LENGTH_SHORT).show();
 
                 intent = new Intent(this, DebugActivity.class);
+                intent.putExtras(connectionType);
                 //EditText editText = (EditText) findViewById(R.id.edit_message);
                 //String message = editText.getText().toString();
                 //intent.putExtra(EXTRA_MESSAGE, message);
@@ -219,7 +233,6 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
     //====================================//
 
     public void onBeginClick(View view) {
-
         if (Mode == Mode_Type.AT) {
             new Thread(new ATSerialThread()).start();
         }
@@ -230,6 +243,8 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
             // TODO: Add socket support
             new Thread(new WiFiThread()).start();
         }
+
+
     }
 
 
@@ -292,6 +307,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
                     Mode = Mode_Type.WiFi;
                 break;
         }
+
     }
 
 
@@ -683,7 +699,6 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
                 break;
             default:
                 break;
-
         }
 
         if (Mode == Mode_Type.WiFi) {
