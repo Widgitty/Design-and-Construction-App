@@ -132,40 +132,30 @@ public class PlotActivity extends ActionBarActivity {
         }
     }
 
-    /*
-    public void onSaveClick(View view) {
-        ThreadToast("Save");
-    }
-    */
-
 
 
     public void onSaveClick(View view) {
-
-        ThreadToast("Save");
 
         //Toast.makeText(getApplicationContext(), "Save", Toast.LENGTH_SHORT).show();
         FileOutputStream outputStream;
 
         //String fileName = ((EditText) findViewById(R.id.edit_file)).getText().toString();
-        String fileName = "OUTPUT.txt";
+        String fileName = "OUTPUT.csv";
 
-        if (!fileName.endsWith(".txt")) {
-            fileName = String.format("%s.txt", fileName);
+        if (!fileName.endsWith(".csv")) {
+            fileName = String.format("%s.csv", fileName);
         }
 
         File sdCard = Environment.getExternalStorageDirectory();
-        File dir = new File (sdCard.getAbsolutePath() + "/wigico/serail");
+        File dir = new File (sdCard.getAbsolutePath() + "/Wigico/Serail");
         dir.mkdirs();
         File file = new File(dir, fileName);
 
         try {
-            //outputStream = openFileOutput(filename, Context.MODE_PRIVATE);
             outputStream = new FileOutputStream(file);
 
             Iterator<DataPoint> iterator = data.getValues(data.getLowestValueX(), data.getHighestValueX());
             while (iterator.hasNext()) {
-            //for (int i = 0; i<=4; i++) {
                 DataPoint dataPoint = iterator.next();
                 outputStream.write(Double.toString(dataPoint.getX()).getBytes());
                 outputStream.write(", ".getBytes());
@@ -178,8 +168,7 @@ public class PlotActivity extends ActionBarActivity {
             e.printStackTrace();
         }
         setResult(RESULT_CANCELED);
-        //finish();
-        ThreadToast("Save Done");
+        ThreadToast("Saved");
     }
 
 
