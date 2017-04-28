@@ -720,6 +720,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
         public void onReceive(Context context, Intent intent) {
             final int newMode = intent.getIntExtra("modeUpdate", 0);
             mode = newMode;
+            ThreadToast("mode" + mode);
 
             if(!modeSet) {
                 modeSelector.post(new Runnable() {

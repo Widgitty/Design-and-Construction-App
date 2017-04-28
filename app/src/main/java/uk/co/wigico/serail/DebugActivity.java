@@ -151,8 +151,9 @@ public class DebugActivity extends ActionBarActivity {
         SetData(mode,getApplicationContext());
     }
 
-
+/*
     public void  onPowerClick(View view) {
         MainActivity.read = false;
     }
+    */
 }
