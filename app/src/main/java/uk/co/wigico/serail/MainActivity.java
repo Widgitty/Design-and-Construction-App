@@ -1,5 +1,6 @@
 package uk.co.wigico.serail;
 
+import android.content.BroadcastReceiver;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
@@ -79,6 +80,8 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
     public static volatile int mode = 0;
     public static volatile int oldMode = 0;
     public static volatile int range = 0;
+
+    boolean modeSet = false;
 
 
 
@@ -690,7 +693,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
 
         String item = adapterView.getItemAtPosition(i).toString();
         tvMonitor.setText(item);
-
+        modeSet = true;
         SetData(i, getApplicationContext());
     }
 
@@ -698,6 +701,28 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
     public void onNothingSelected(AdapterView<?> adapterView) {
         //Toast.makeText(getApplicationContext(), "No mode selected", Toast.LENGTH_SHORT).show();
     }
+
+
+
+
+
+    private BroadcastReceiver mModeReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            final int newMode = intent.getIntExtra("modeUpdate", 0);
+            mode = newMode;
+
+            if(!modeSet) {
+                modeSelector.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        modeSelector.setSelection(newMode);
+                    }
+                });
+            modeSet = false;
+            }
+        }
+    };
 
 
 
