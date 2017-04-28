@@ -8,10 +8,12 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.Toast;
 
 import com.jjoe64.graphview.GraphView;
+import com.jjoe64.graphview.LabelFormatter;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
 import com.jjoe64.graphview.DefaultLabelFormatter;
@@ -37,6 +39,7 @@ public class PlotActivity extends ActionBarActivity{
     Long startTime = (long)0;
     int recordingMode = 0;
     String[] units = {"A", "V", "\u03A9","C", "H","Hz"};
+    EditText setSampleRate;
     int sampleRate = 500;
 
 
@@ -67,6 +70,8 @@ public class PlotActivity extends ActionBarActivity{
         graph.addSeries(data);
 
         btnStartStop = (Button) findViewById(R.id.btnStartStop);
+
+        setSampleRate = (EditText)findViewById(R.id.setSampleRate);
     }
 
     @Override
@@ -106,7 +111,7 @@ public class PlotActivity extends ActionBarActivity{
                 graph.getViewport().setXAxisBoundsManual(true);
                 graph.getViewport().setMaxX((elapsedRealtime () - startTime));
                 graph.getViewport().setMinX(0);
-                graph.getGridLabelRenderer().setLabelFormatter(new DefaultLabelFormatter() {
+                LabelFormatter labelFormatter = (new DefaultLabelFormatter() {
                     @Override
                     public String formatLabel(double value, boolean isValueX) {
                         if (isValueX) {
@@ -118,6 +123,12 @@ public class PlotActivity extends ActionBarActivity{
                         }
                     }
                 });
+
+                //graph.getGridLabelRenderer().setPadding(1);
+                //graph.getGridLabelRenderer().setLabelsSpace(5);
+                graph.getGridLabelRenderer().setLabelVerticalWidth(100);
+
+                graph.getGridLabelRenderer().setLabelFormatter(labelFormatter);
 
 
 
@@ -161,6 +172,8 @@ public class PlotActivity extends ActionBarActivity{
         }
         else {
             record = true;
+            sampleRate = Integer.parseInt(setSampleRate.getText().toString());
+            sampleRate = sampleRate * 1000;
             //data.setAnimated(true);
             recordingMode = MainActivity.mode;
             new Thread(new UpdateThread()).start();
@@ -169,7 +182,7 @@ public class PlotActivity extends ActionBarActivity{
         }
     }
 
-
+/*
     public void onRadioButtonClicked(View view) {
         // Is the button now checked?
         boolean checked = ((RadioButton) view).isChecked();
@@ -189,6 +202,7 @@ public class PlotActivity extends ActionBarActivity{
                 break;
         }
     }
+    */
 
 
     public void onSaveClick(View view) {
