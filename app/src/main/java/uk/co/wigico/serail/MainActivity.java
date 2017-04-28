@@ -1,6 +1,7 @@
 package uk.co.wigico.serail;
 
 import android.content.BroadcastReceiver;
+import android.content.IntentFilter;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
@@ -80,6 +81,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
     public static volatile int mode = 0;
     public static volatile int oldMode = 0;
     public static volatile int range = 0;
+    public static volatile boolean connected = false;
 
     boolean modeSet = false;
 
@@ -138,6 +140,9 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         modeSelector.setAdapter(adapter);
         modeSelector.setOnItemSelectedListener(this);
+
+        LocalBroadcastManager.getInstance(this).registerReceiver(mModeReceiver,
+                new IntentFilter("modeUpdate"));
 
     }
 
@@ -350,6 +355,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
             char LEDs = 0x00;
             byte[] rbuf = new byte[4096]; // 1byte <--slow-- [Transfer Speed] --fast--> 4096 byte
 
+            connected = true;
             while (read) {
                 try {
                     Thread.sleep(100);
@@ -371,6 +377,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
             MaskButtonsConnected(false);
             ThreadToast("Disconnected");
             SerialFlag = false;
+            connected = false;
 
         }
     }
@@ -411,6 +418,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
                 read = false;
             }
 
+            connected = true;
             while (read) {
                 try {
                     if (inputStream.read(buffer) > 0) {
@@ -435,6 +443,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
                 }
             }
 
+            connected = false;
             ThreadToast("Disconnected");
             MaskButtonsConnected(false);
         }
@@ -716,11 +725,11 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
                 modeSelector.post(new Runnable() {
                     @Override
                     public void run() {
-                        modeSelector.setSelection(newMode);
+                        modeSelector.setSelection(mode);
                     }
                 });
-            modeSet = false;
             }
+            modeSet = false;
         }
     };
 

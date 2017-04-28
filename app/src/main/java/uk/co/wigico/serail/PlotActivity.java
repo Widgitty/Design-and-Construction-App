@@ -104,6 +104,11 @@ public class PlotActivity extends ActionBarActivity{
         @Override
         public void run(){
 
+
+            graph.removeAllSeries();
+            data = new LineGraphSeries<DataPoint>();
+            graph.addSeries(data);
+
             while(record) {
                 //ThreadToast("Update");
                 data.appendData(new DataPoint((elapsedRealtime () - startTime), MainActivity.received), true, count);

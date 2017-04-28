@@ -150,4 +150,9 @@ public class DebugActivity extends ActionBarActivity {
         dial.setRotation(40*mode - 90);
         SetData(mode,getApplicationContext());
     }
+
+
+    public void  onPowerClick(View view) {
+        MainActivity.read = false;
+    }
 }
