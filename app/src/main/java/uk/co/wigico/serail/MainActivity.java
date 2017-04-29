@@ -69,7 +69,6 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
     EditText sendMessage;
     RadioButton radioButton1;
     RadioButton radioButton2;
-    RadioButton radioButton3;
     Spinner modeSelector;
 
     // [FTDriver] Permission String
@@ -100,8 +99,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
         btnWrite = (Button) findViewById(R.id.btnWrite);
         btnEnd = (Button) findViewById(R.id.btnEnd);
         radioButton1 = (RadioButton) findViewById(R.id.radio_AT);
-        radioButton2 = (RadioButton) findViewById(R.id.radio_FT);
-        radioButton3 = (RadioButton) findViewById(R.id.radio_WiFi);
+        radioButton2 = (RadioButton) findViewById(R.id.radio_WiFi);
         modeSelector = (Spinner) findViewById(R.id.modeSelectionSpinner);
 
 
@@ -176,7 +174,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
         switch (item.getItemId()) {
             case R.id.action_favorite:
                 // About option clicked.
-                Toast.makeText(this, "Icon", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(this, "Icon", Toast.LENGTH_SHORT).show();
                 return true;
             case R.id.action_GUI:
                 // Exit option clicked.
@@ -192,25 +190,13 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
                 return true;
             case R.id.action_plot:
                 // Exit option clicked.
-                Toast.makeText(this, "Data Logger", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(this, "Data Logger", Toast.LENGTH_SHORT).show();
 
                 intent = new Intent(this, PlotActivity.class);
                 //EditText editText = (EditText) findViewById(R.id.edit_message);
                 //String message = editText.getText().toString();
                 //intent.putExtra(EXTRA_MESSAGE, message);
                 startActivity(intent);
-
-                return true;
-
-            case R.id.action_nav:
-                // Exit option clicked.
-                Toast.makeText(this, "Nav", Toast.LENGTH_SHORT).show();
-
-                //intent = new Intent(this, NavigationDrawerActivity.class);
-                //EditText editText = (EditText) findViewById(R.id.edit_message);
-                //String message = editText.getText().toString();
-                //intent.putExtra(EXTRA_MESSAGE, message);
-                //startActivity(intent);
 
                 return true;
 
@@ -307,12 +293,6 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
                 if (checked)
                     Toast.makeText(this, "AT chip selected", Toast.LENGTH_SHORT).show();
                     Mode = Mode_Type.AT;
-                    break;
-            case R.id.radio_FT:
-                if (checked)
-                    Toast.makeText(this, "FT chip not yet supported", Toast.LENGTH_SHORT).show();
-                    ((RadioButton) findViewById(R.id.radio_FT)).setChecked(false);
-                    ((RadioButton) findViewById(R.id.radio_AT)).setChecked(true);
                     break;
             case R.id.radio_WiFi:
                 if (checked)
@@ -543,7 +523,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
                             units = "M";
                             break;
                         default:
-                            units = "?";
+                            units = "";
                             break;
                     }
 
@@ -572,7 +552,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
                             units = (units + "Hz");
                             break;
                         default:
-                            units = (units + "?");
+                            units = (units + "");
                             break;
                     }
 
@@ -580,7 +560,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
                     str = (str + String.format("%d\n", checksum));
 
                     str = (str + "\nOutput:\n");
-                    str = (str + String.format("%.5f %s\n", received, units));
+                    str = (String.format("%.3f %s\n", received, units));
 
                     DisplayString(str);
                     sendDataBroadCast(received, units);
@@ -589,7 +569,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
                     oldMode = mode;
                 }
                 else {
-                    DisplayString("Checksum failed!");
+                    //DisplayString("Checksum failed!");
                 }
                 checksum = 0x00;
                 bb.clear();
@@ -687,13 +667,6 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
                 radioButton2.setEnabled(!mask);
             }
         });
-
-        radioButton3.post(new Runnable() {
-            @Override
-            public void run() {
-                radioButton3.setEnabled(!mask);
-            }
-        });
     }
 
     /*Spinner Listener, to do something when an item is selected*/
@@ -701,7 +674,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
     public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
 
         String item = adapterView.getItemAtPosition(i).toString();
-        tvMonitor.setText(item);
+        //tvMonitor.setText(item);
         modeSet = true;
         SetData(i, getApplicationContext());
     }

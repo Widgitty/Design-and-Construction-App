@@ -6,12 +6,8 @@
         android:icon="@mipmap/ic_launcher"
         android:title="Thing"
         app:showAsAction="ifRoom"/>
-    <item android:id="@+id/action_settings" android:title="@string/action_settings"
-        android:orderInCategory="100" app:showAsAction="never" />
     <item android:id="@+id/action_plot" android:title="Data Logger"
         android:orderInCategory="100" app:showAsAction="never" />
     <item android:id="@+id/action_GUI" android:title="GUI"
-        android:orderInCategory="100" app:showAsAction="never" />
-    <item android:id="@+id/action_nav" android:title="Nav"
         android:orderInCategory="100" app:showAsAction="never" />
 </menu>

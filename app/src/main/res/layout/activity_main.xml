@@ -27,21 +27,18 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal">
             <RadioButton android:id="@+id/radio_AT"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:text="ATmega16u2"
                 android:checked="true"
+                android:layout_weight="0.5"
                 android:paddingRight="10dp"
                 android:onClick="onRadioButtonClicked"/>
-            <RadioButton android:id="@+id/radio_FT"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="FT232HQ"
-                android:onClick="onRadioButtonClicked"/>
             <RadioButton android:id="@+id/radio_WiFi"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:text="WiFi"
+                android:layout_weight="0.5"
                 android:onClick="onRadioButtonClicked"/>
         </RadioGroup>
 
@@ -277,7 +274,8 @@
             android:id="@+id/tvMonitor"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="" />
+            android:text=""
+            android:textAppearance="@android:style/TextAppearance.Large" />
 
     </LinearLayout>
 

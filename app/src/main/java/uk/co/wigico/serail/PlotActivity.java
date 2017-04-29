@@ -104,7 +104,6 @@ public class PlotActivity extends ActionBarActivity{
         @Override
         public void run(){
 
-
             graph.removeAllSeries();
             data = new LineGraphSeries<DataPoint>();
             graph.addSeries(data);
@@ -137,35 +136,21 @@ public class PlotActivity extends ActionBarActivity{
 
 
 
-                    switch (MainActivity.mode){
+                try {
+                    Thread.sleep(sampleRate);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
 
-                        case 0:
-                             break;
-                        case 1:
-                            break;
-                        case 2:
-                            break;
-                        case 3:
-                            break;
-                        case 4:
-                            break;
-                        case 5:
-                            break;
-                        default:
-                            break;
-                    }
-
-                    try {
-                        Thread.sleep(sampleRate);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-
+                if (recordingMode != MainActivity.mode) {
+                    record = false;
+                    btnStartStop.setText("Start");
+                    ThreadToast("Mode changed!");
                 }
 
             }
 
-
+        }
 
     }
 
